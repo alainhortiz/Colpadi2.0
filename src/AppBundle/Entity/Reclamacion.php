@@ -1,0 +1,414 @@
+<?php
+
+namespace AppBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Reclamacion
+ *
+ * @ORM\Table(name="reclamacion")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ReclamacionRepository")
+ */
+class Reclamacion
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fechaEntrada", type="datetime")
+     */
+    private $fechaEntrada;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="fechaRespuesta", type="datetime", nullable=true)
+     */
+    private $fechaRespuesta;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="asunto", type="text")
+     */
+    private $asunto;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodClasificacionReclamacion",inversedBy="reclamaciones")
+     */
+    protected $clasificacion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodProvincia",inversedBy="reclamaciones")
+     */
+    protected $provinciaOcurrencia;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodProcedencia",inversedBy="reclamaciones")
+     */
+    protected $procedencia;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodConclusion",inversedBy="reclamaciones")
+     */
+    protected $conclusion;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodEstadoReclamacion",inversedBy="reclamaciones")
+     */
+    protected $estado;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\CodConformidad",inversedBy="reclamaciones")
+     */
+    protected $conformidad;
+
+    /**
+     * @var string
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Promovente" ,inversedBy="reclamacion")
+     * @ORM\JoinColumn(name="promovente_id" , referencedColumnName="id")
+     */
+    private $promovente;
+
+    /**
+     * @var string
+     *
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\Afectado" ,inversedBy="reclamacion")
+     * @ORM\JoinColumn(name="afectado_id" , referencedColumnName="id")
+     */
+    private $afectado;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ReclamacionUnidad", mappedBy="reclamacion", cascade={"remove"})
+     */
+    private $reclamacionUnidades;
+
+    /**
+     * Reclamacion constructor.
+     */
+    public function __construct()
+    {
+        $this->reclamacionUnidades = new ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set fechaEntrada
+     *
+     * @param \DateTime $fechaEntrada
+     *
+     * @return Reclamacion
+     */
+    public function setFechaEntrada($fechaEntrada)
+    {
+        $this->fechaEntrada = $fechaEntrada;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaEntrada
+     *
+     * @return \DateTime
+     */
+    public function getFechaEntrada()
+    {
+        return $this->fechaEntrada;
+    }
+
+    /**
+     * Set fechaRespuesta
+     *
+     * @param \DateTime $fechaRespuesta
+     *
+     * @return Reclamacion
+     */
+    public function setFechaRespuesta($fechaRespuesta)
+    {
+        $this->fechaRespuesta = $fechaRespuesta;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaRespuesta
+     *
+     * @return \DateTime
+     */
+    public function getFechaRespuesta()
+    {
+        return $this->fechaRespuesta;
+    }
+
+    /**
+     * Set asunto
+     *
+     * @param string $asunto
+     *
+     * @return Reclamacion
+     */
+    public function setAsunto($asunto)
+    {
+        $this->asunto = $asunto;
+
+        return $this;
+    }
+
+    /**
+     * Get asunto
+     *
+     * @return string
+     */
+    public function getAsunto()
+    {
+        return $this->asunto;
+    }
+
+    /**
+     * Set clasificacion
+     *
+     * @param \AppBundle\Entity\CodClasificacionReclamacion $clasificacion
+     *
+     * @return Reclamacion
+     */
+    public function setClasificacion(\AppBundle\Entity\CodClasificacionReclamacion $clasificacion = null)
+    {
+        $this->clasificacion = $clasificacion;
+
+        return $this;
+    }
+
+    /**
+     * Get clasificacion
+     *
+     * @return \AppBundle\Entity\CodClasificacionReclamacion
+     */
+    public function getClasificacion()
+    {
+        return $this->clasificacion;
+    }
+
+    /**
+     * Set provinciaOcurrencia
+     *
+     * @param \AppBundle\Entity\CodProvincia $provinciaOcurrencia
+     *
+     * @return Reclamacion
+     */
+    public function setProvinciaOcurrencia(\AppBundle\Entity\CodProvincia $provinciaOcurrencia = null)
+    {
+        $this->provinciaOcurrencia = $provinciaOcurrencia;
+
+        return $this;
+    }
+
+    /**
+     * Get provinciaOcurrencia
+     *
+     * @return \AppBundle\Entity\CodProvincia
+     */
+    public function getProvinciaOcurrencia()
+    {
+        return $this->provinciaOcurrencia;
+    }
+
+    /**
+     * Set procedencia
+     *
+     * @param \AppBundle\Entity\CodProcedencia $procedencia
+     *
+     * @return Reclamacion
+     */
+    public function setProcedencia(\AppBundle\Entity\CodProcedencia $procedencia = null)
+    {
+        $this->procedencia = $procedencia;
+
+        return $this;
+    }
+
+    /**
+     * Get procedencia
+     *
+     * @return \AppBundle\Entity\CodProcedencia
+     */
+    public function getProcedencia()
+    {
+        return $this->procedencia;
+    }
+
+    /**
+     * Set conclusion
+     *
+     * @param \AppBundle\Entity\CodConclusion $conclusion
+     *
+     * @return Reclamacion
+     */
+    public function setConclusion(\AppBundle\Entity\CodConclusion $conclusion = null)
+    {
+        $this->conclusion = $conclusion;
+
+        return $this;
+    }
+
+    /**
+     * Get conclusion
+     *
+     * @return \AppBundle\Entity\CodConclusion
+     */
+    public function getConclusion()
+    {
+        return $this->conclusion;
+    }
+
+    /**
+     * Set estado
+     *
+     * @param \AppBundle\Entity\CodEstadoReclamacion $estado
+     *
+     * @return Reclamacion
+     */
+    public function setEstado(\AppBundle\Entity\CodEstadoReclamacion $estado = null)
+    {
+        $this->estado = $estado;
+
+        return $this;
+    }
+
+    /**
+     * Get estado
+     *
+     * @return \AppBundle\Entity\CodEstadoReclamacion
+     */
+    public function getEstado()
+    {
+        return $this->estado;
+    }
+
+    /**
+     * Set conformidad
+     *
+     * @param \AppBundle\Entity\CodConformidad $conformidad
+     *
+     * @return Reclamacion
+     */
+    public function setConformidad(\AppBundle\Entity\CodConformidad $conformidad = null)
+    {
+        $this->conformidad = $conformidad;
+
+        return $this;
+    }
+
+    /**
+     * Get conformidad
+     *
+     * @return \AppBundle\Entity\CodConformidad
+     */
+    public function getConformidad()
+    {
+        return $this->conformidad;
+    }
+
+
+
+    /**
+     * Set promovente
+     *
+     * @param \AppBundle\Entity\Promovente $promovente
+     *
+     * @return Reclamacion
+     */
+    public function setPromovente(\AppBundle\Entity\Promovente $promovente = null)
+    {
+        $this->promovente = $promovente;
+
+        return $this;
+    }
+
+    /**
+     * Get promovente
+     *
+     * @return \AppBundle\Entity\Promovente
+     */
+    public function getPromovente()
+    {
+        return $this->promovente;
+    }
+
+    /**
+     * Set afectado
+     *
+     * @param \AppBundle\Entity\Afectado $afectado
+     *
+     * @return Reclamacion
+     */
+    public function setAfectado(\AppBundle\Entity\Afectado $afectado = null)
+    {
+        $this->afectado = $afectado;
+
+        return $this;
+    }
+
+    /**
+     * Get afectado
+     *
+     * @return \AppBundle\Entity\Afectado
+     */
+    public function getAfectado()
+    {
+        return $this->afectado;
+    }
+
+    /**
+     * Add reclamacionUnidade
+     *
+     * @param \AppBundle\Entity\ReclamacionUnidad $reclamacionUnidade
+     *
+     * @return Reclamacion
+     */
+    public function addReclamacionUnidade(\AppBundle\Entity\ReclamacionUnidad $reclamacionUnidade)
+    {
+        $this->reclamacionUnidades[] = $reclamacionUnidade;
+
+        return $this;
+    }
+
+    /**
+     * Remove reclamacionUnidade
+     *
+     * @param \AppBundle\Entity\ReclamacionUnidad $reclamacionUnidade
+     */
+    public function removeReclamacionUnidade(\AppBundle\Entity\ReclamacionUnidad $reclamacionUnidade)
+    {
+        $this->reclamacionUnidades->removeElement($reclamacionUnidade);
+    }
+
+    /**
+     * Get reclamacionUnidades
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReclamacionUnidades()
+    {
+        return $this->reclamacionUnidades;
+    }
+}

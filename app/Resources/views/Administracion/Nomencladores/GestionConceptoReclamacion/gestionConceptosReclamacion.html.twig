@@ -1,0 +1,284 @@
+{% extends 'Administracion/inicioAdministrador.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('easyadmin/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('easyadmin/global/css/estilos.css') }}"/>
+{% endblock %}
+
+{% block body %}
+    <div class="preload hidden">
+        <div class="logo"></div>
+        <div class="loader-frame">
+            <div class="loader1" id="loader1"></div>
+            <div class="loader2" id="loader2"></div>
+        </div>
+    </div>
+    <!-- BEGIN PAGE HEADER-->
+    <h3 class="page-title">
+        Gestionar Conceptos de la Reclamación
+    </h3>
+    <!-- END PAGE HEADER-->
+    <div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN EXAMPLE TABLE PORTLET-->
+            <div class="portlet box grey-cascade">
+                <div class="portlet-title" style="background-color: #3598dc">
+                    <div class="caption">
+                        <i class="fa fa-table"></i>
+                    </div>
+                    <div class="tools">
+                        <a href="javascript:;" class="collapse">
+                        </a>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="table-toolbar">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="btn-group">
+                                    <a id="sample_editable_1_new" class="btn green" data-toggle="modal" href="#addConceptoReclamacion">
+                                        Agregar <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-bordered table-hover myDataTable" id="dataConceptoReclamacion">
+                        <thead>
+                        <tr>
+                            <th>
+                                Nombre
+                            </th>
+                            <th>
+                                Acciones
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for concepto in conceptos %}
+                            <tr data-id ="{{ concepto.id }}" class="odd gradeX">
+                                <td>{{ concepto.nombre }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-primary btn-xs edit"><i class="fa fa-pencil"></i> Editar</a>
+                                    <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o "></i> Borrar</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- END EXAMPLE TABLE PORTLET-->
+        </div>
+        {{ include('Administracion/Nomencladores/GestionConceptoReclamacion/modalAddConceptoReclamacion.html.twig') }}
+        {{ include('Administracion/Nomencladores/GestionConceptoReclamacion/modalEditConceptoReclamacion.html.twig') }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('easyadmin/plugins/datatables/media/js/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('easyadmin/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js') }}"></script>
+    <script src="{{ asset('easyadmin/tema/pages/js/table-managed.js') }}"></script>
+    <script>
+        jQuery(document).ready(function() {
+            /* TableManaged.init();*/
+            $('#dataProvincia').dataTable({
+
+                    'language': {
+                        "emptyTable": "No hay datos disponibles para mostrar en la tabla",
+                        "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                        "infoEmpty": "No se encontraron datos",
+                        "infoFiltered": "(buscando 1 de _MAX_ total entradas)",
+                        "lengthMenu": "Mostrar _MENU_ entradas",
+                        "search": "Buscar:",
+                        "zeroRecords": "No se encontraron datos en la busqueda"
+                    }
+                }
+            );
+
+            $('#addGuardar').on('click',function () {
+
+                var errores = 0;
+                $('#addConceptoReclamacion input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#addConceptoReclamacion').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    nombre: $("#addNombre").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("insertConceptoReclamacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data == 'ok'){
+
+                        alertify.alert('<strong>El concepto ha sido insertado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmacion</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                $('#addProvincia input').each(function(){
+                                    $(this).val('');
+                                });
+                                window.location.href = "{{ path('gestionarConceptosReclamacion') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            var idConceptoReclamacion = '';
+            var nombre = '';
+
+            // función que carga datos en el formulario para editar
+            $('#dataConceptoReclamacion tbody').on('click', '.edit', function () {
+
+                var row = $(this).parents('tr');
+                idConceptoReclamacion = row.data('id');
+
+                {% for concepto in conceptos %}
+                    var id = '{{ concepto.id }}';
+                    if( id == idConceptoReclamacion)
+                    {
+                        $('#editNombre').val('{{ concepto.nombre }}');
+                        nombre = '{{ concepto.nombre }}';
+                    }
+                {% endfor %}
+                $('#editConceptoReclamacion').modal('show');
+            });
+
+            $('#editNombre').on("keyup", function(){
+
+                if($('#editNombre').val().toUpperCase() != nombre.toUpperCase()){
+
+                    $('#editGuardar').prop("disabled",false);
+                }else{
+                    $('#editGuardar').prop("disabled",true);
+                }
+            });
+
+            $('#editGuardar').on('click',function () {
+
+                var errores = 0;
+                $('#editConceptoReclamacion input[type=text]').each(function () {
+
+                    var name = $(this).prop('name');
+                    if($(this).val().trim() == ''){
+                        $(this).addClass('input-error');
+                        $('.'+name).removeClass('hidden');
+                        errores++;
+                    }else {
+                        $(this).removeClass('input-error');
+                        $('.'+name).addClass('hidden');
+                    }
+                });
+                if(errores !== 0) return false;
+
+                $('#editConceptoReclamacion').modal('hide');
+                $(".preload").removeClass('hidden');
+
+                var mat_datos = {
+                    idConceptoReclamacion: idConceptoReclamacion,
+                    nombre: $("#editNombre").val()
+                };
+                $.ajax({
+                    type: "POST",
+                    dataType: "html",
+                    url: '{{ path("updateConceptoReclamacion") }}',
+                    data: mat_datos
+                }).done(function (data) {
+
+                    $(".preload").addClass('hidden');
+                    if(data == 'ok'){
+
+                        alertify.alert('<strong>El concepto ha sido modificado correctamente</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmacion</h4>')
+                            .set('label','Aceptar')
+                            .set('onok', function () {
+                                window.location.href = "{{ path('gestionarConceptosReclamacion') }}";
+                            });
+                    }else{
+                        alertify.alert('<strong>'+ data +'</strong>')
+                            .setHeader('<span class="glyphicon glyphicon-ban-circle" style="font-size: 20px"></span>' +
+                                '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Error</h4>')
+                            .set('label','Aceptar')
+                    }
+                });
+
+            });
+
+            $('#dataConceptoReclamacion tbody').on('click', '.delete', function () {
+
+                var row = $(this).parents('tr');
+
+                var mat_datos = { idConceptoReclamacion: row.data('id') };
+
+                alertify.confirm('Basic: false').set('message', '<strong>Seguro que desea eliminar el concepto seleccionado</strong>').set('onok', function(){
+
+                    $(".preload").removeClass('hidden');
+
+                    $.ajax({
+                        type: "POST",
+                        dataType: "html",
+                        url: '{{ path("deleteConceptoReclamacion") }}',
+                        data: mat_datos
+                    }).done(function (data) {
+
+                        $(".preload").addClass('hidden');
+                        if(data == 'ok'){
+
+                            alertify.alert('<strong>El concepto ha sido eliminado correctamente</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                                .set('onok', function(){
+
+                                    row.fadeOut();
+                                });
+                        }else {
+                            alertify.alert('<strong>'+data+'</strong>')
+                                .setHeader('<span class="glyphicon glyphicon-ok-circle" style="font-size: 20px"></span>' +
+                                    '<h4 class="modal-title" style="display: inline-block; margin-left: 10px">Confirmación</h4>')
+                                .set('label','Aceptar')
+                        }
+                    });
+                });
+            });
+
+            //funcion para quitar los mensajes de error al cerrar las modales
+            $('.cerrar').on('click', function () {
+
+                $(':input').removeClass('input-error');
+                $('.fa-exclamation').addClass('hidden');
+                $('#editGuardar').prop("disabled",true);
+            })
+
+
+        });
+    </script>
+{% endblock %}
